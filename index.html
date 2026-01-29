@@ -999,6 +999,50 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- Add Train Modal -->
+    <div class="modal-overlay" id="addTrainModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Train</h2>
+                <button class="modal-close" onclick="closeAddTrainModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label>Train Name *</label>
+                    <input type="text" id="newTrainName" placeholder="e.g., T2-W-Web-26-Mar-A">
+                </div>
+                <div class="form-row-grid">
+                    <div class="form-row">
+                        <label>Code Cutoff</label>
+                        <input type="datetime-local" id="newTrainCodeCutoff">
+                    </div>
+                    <div class="form-row">
+                        <label>Snap Date</label>
+                        <input type="datetime-local" id="newTrainSnapDate">
+                    </div>
+                </div>
+                <div class="form-row-grid">
+                    <div class="form-row">
+                        <label>Ring 2</label>
+                        <input type="datetime-local" id="newTrainRing2">
+                    </div>
+                    <div class="form-row">
+                        <label>Ring 3</label>
+                        <input type="datetime-local" id="newTrainRing3">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>General Availability</label>
+                    <input type="datetime-local" id="newTrainGeneral">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeAddTrainModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveNewTrain()">Add Train</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Fix Modal -->
     <div class="modal-overlay" id="addFixModal">
         <div class="modal-content">
@@ -1398,20 +1442,44 @@
         }
 
         function addTrain() {
-            const name = prompt('Enter train name (e.g., T2-W-Web-26-Mar-A):');
-            if (!name) return;
+            // Clear form
+            document.getElementById('newTrainName').value = '';
+            document.getElementById('newTrainCodeCutoff').value = '';
+            document.getElementById('newTrainSnapDate').value = '';
+            document.getElementById('newTrainRing2').value = '';
+            document.getElementById('newTrainRing3').value = '';
+            document.getElementById('newTrainGeneral').value = '';
+
+            // Show modal
+            document.getElementById('addTrainModal').classList.add('show');
+            document.getElementById('newTrainName').focus();
+        }
+
+        function closeAddTrainModal() {
+            document.getElementById('addTrainModal').classList.remove('show');
+        }
+
+        function saveNewTrain() {
+            const name = document.getElementById('newTrainName').value.trim();
+
+            if (!name) {
+                showToast('Train name is required');
+                return;
+            }
 
             data.trains.push({
                 id: Date.now().toString(),
                 name: name,
-                codeCutoff: '',
-                snapDate: '',
-                ring2: '',
-                ring3: '',
-                general: ''
+                codeCutoff: document.getElementById('newTrainCodeCutoff').value,
+                snapDate: document.getElementById('newTrainSnapDate').value,
+                ring2: document.getElementById('newTrainRing2').value,
+                ring3: document.getElementById('newTrainRing3').value,
+                general: document.getElementById('newTrainGeneral').value
             });
+
             saveData();
             renderTrainTabs();
+            closeAddTrainModal();
             showToast('Train added');
         }
 
