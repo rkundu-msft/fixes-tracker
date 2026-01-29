@@ -523,14 +523,26 @@
             background: transparent;
             font: inherit;
             width: 100%;
+            min-width: 200px;
             outline: none;
-            padding: 2px 4px;
+            padding: 6px 8px;
             margin: -2px -4px;
             border-radius: 4px;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.4;
         }
 
         .fix-title-input:focus {
             background: var(--surface-selected);
+        }
+
+        /* Title column */
+        .checklist-table td:nth-child(3) {
+            min-width: 250px;
+            max-width: 350px;
+            word-wrap: break-word;
+            white-space: normal;
         }
 
         /* Tags */
