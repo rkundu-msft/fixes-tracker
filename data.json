@@ -57,17 +57,6 @@
   ],
   "fixes": [
     {
-      "id": "1769689204405",
-      "bugId": "Test Bug",
-      "title": "TTH redirection broken",
-      "component": "",
-      "owner": "",
-      "priority": "P2",
-      "targetTrain": "3",
-      "status": "Pending",
-      "notes": ""
-    },
-    {
       "id": "1",
       "bugId": "12345",
       "title": "Fix login timeout issue",
