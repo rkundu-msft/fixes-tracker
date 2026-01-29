@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Train Tracker - Loop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #6264A7;
+            --brand-hover: #7F85F5;
+            --surface: #ffffff;
+            --surface-hover: #f5f5f5;
+            --surface-selected: #E8EBFA;
+            --text-primary: #242424;
+            --text-secondary: #616161;
+            --text-disabled: #ADADAD;
+            --border: #E0E0E0;
+            --border-strong: #D1D1D1;
+            --success: #6BB700;
+            --success-bg: #E7F5D4;
+            --warning: #FFAA44;
+            --warning-bg: #FFF4CE;
+            --danger: #C4314B;
+            --danger-bg: #FCE5E8;
+            --info: #5B5FC7;
+            --info-bg: #E8EBFA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F5F5F5;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Loop Document Container */
+        .loop-page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            min-height: 100vh;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Header Bar */
+        .loop-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 100;
+        }
+
+        .loop-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .loop-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6264A7 0%, #8B8CC7 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loop-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .loop-title-input {
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: transparent;
+        }
+
+        .loop-title-input:hover {
+            background: var(--surface-hover);
+        }
+
+        .loop-title-input:focus {
+            background: var(--surface-selected);
+        }
+
+        .loop-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .header-btn:hover {
+            background: var(--surface-hover);
+        }
+
+        .header-btn.primary {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        .header-btn.primary:hover {
+            background: var(--brand-hover);
+        }
+
+        .avatar-stack {
+            display: flex;
+            margin-right: 8px;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-left: -8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .avatar:first-child { margin-left: 0; }
+        .avatar.blue { background: #0078D4; }
+        .avatar.green { background: #107C10; }
+        .avatar.purple { background: #6264A7; }
+
+        /* Content Area */
+        .loop-content {
+            padding: 32px 48px 80px;
+        }
+
+        /* Document Title */
+        .doc-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            outline: none;
+            border: none;
+            width: 100%;
+            padding: 4px 0;
+        }
+
+        .doc-title:empty:before {
+            content: attr(data-placeholder);
+            color: var(--text-disabled);
+        }
+
+        .doc-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .last-edited {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Loop Components */
+        .loop-component {
+            margin-bottom: 24px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .loop-component:hover {
+            border-color: var(--border);
+        }
+
+        .loop-component.selected {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 1px var(--brand-primary);
+        }
+
+        /* Component Header */
+        .component-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--surface-hover);
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .component-title {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .component-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .loop-component:hover .component-actions {
+            opacity: 1;
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .icon-btn:hover {
+            background: var(--surface);
+        }
+
+        /* Progress Ring */
+        .progress-section {
+            display: flex;
+            gap: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #F8F8FF 0%, #F0F4FF 100%);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 8;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: var(--brand-primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            flex: 1;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.included { background: var(--success-bg); }
+        .stat-icon.targeted { background: var(--warning-bg); }
+        .stat-icon.pending { background: var(--info-bg); }
+        .stat-icon.missed { background: var(--danger-bg); }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Train Selector Tabs */
+        .train-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--surface-hover);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .train-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+
+        .train-tab:hover {
+            background: white;
+            color: var(--text-primary);
+        }
+
+        .train-tab.active {
+            background: white;
+            color: var(--brand-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .train-tab .badge {
+            background: var(--border);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 6px;
+        }
+
+        .train-tab.active .badge {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        /* Train Info Card */
+        .train-info {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            padding: 16px;
+            background: var(--surface-hover);
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .train-info-item {
+            text-align: center;
+        }
+
+        .train-info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .train-info-value {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .train-info-value.highlight {
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+
+        /* Checklist Table */
+        .checklist-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .checklist-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            background: var(--surface-hover);
+            border-bottom: 1px solid var(--border);
+            letter-spacing: 0.5px;
+        }
+
+        .checklist-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .checklist-table tr:hover {
+            background: var(--surface-hover);
+        }
+
+        .checklist-table tr.completed {
+            opacity: 0.7;
+        }
+
+        .checklist-table tr.completed .fix-title {
+            text-decoration: line-through;
+        }
+
+        /* Checkbox */
+        .loop-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-strong);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .loop-checkbox:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .loop-checkbox.checked {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+        }
+
+        .loop-checkbox.checked svg {
+            display: block;
+        }
+
+        .loop-checkbox svg {
+            display: none;
+            width: 14px;
+            height: 14px;
+            fill: white;
+        }
+
+        /* Fix Row */
+        .fix-id {
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--brand-primary);
+            cursor: pointer;
+        }
+
+        .fix-id:hover {
+            text-decoration: underline;
+        }
+
+        .fix-title {
+            font-weight: 500;
+        }
+
+        .fix-title-input {
+            border: none;
+            background: transparent;
+            font: inherit;
+            width: 100%;
+            outline: none;
+            padding: 2px 4px;
+            margin: -2px -4px;
+            border-radius: 4px;
+        }
+
+        .fix-title-input:focus {
+            background: var(--surface-selected);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .tag.p1 { background: var(--danger-bg); color: var(--danger); }
+        .tag.p2 { background: var(--warning-bg); color: #8a6d00; }
+        .tag.p3 { background: var(--info-bg); color: var(--info); }
+
+        .tag.included { background: var(--success-bg); color: #4a8200; }
+        .tag.targeted { background: var(--warning-bg); color: #8a6d00; }
+        .tag.pending { background: var(--surface-hover); color: var(--text-secondary); }
+        .tag.missed { background: var(--danger-bg); color: var(--danger); }
+        .tag.rolled-back { background: #F3F2F1; color: var(--text-secondary); }
+
+        /* Owner */
+        .owner-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .owner-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Add Row */
+        .add-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .add-row:hover {
+            background: var(--surface-hover);
+            color: var(--brand-primary);
+        }
+
+        /* Inline Dropdown */
+        .inline-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 1000;
+            min-width: 160px;
+            padding: 4px;
+            display: none;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dropdown-item:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Notes */
+        .notes-cell {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .notes-input {
+            border: none;
+            background: transparent;
+            font: inherit;
+            color: inherit;
+            width: 100%;
+            outline: none;
+            padding: 2px 4px;
+            margin: -2px -4px;
+            border-radius: 4px;
+        }
+
+        .notes-input:focus {
+            background: var(--surface-selected);
+            color: var(--text-primary);
+        }
+
+        .notes-input::placeholder {
+            color: var(--text-disabled);
+        }
+
+        /* Footer Toolbar */
+        .loop-toolbar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .toolbar-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            background: var(--border);
+            margin: 4px 8px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 2000;
+        }
+
+        .toast.show { display: block; animation: fadeInUp 0.3s ease; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 32px 0 16px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .section-header:first-child {
+            margin-top: 0;
+        }
+
+        /* Editable text */
+        [contenteditable]:focus {
+            outline: none;
+        }
+
+        [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: var(--text-disabled);
+        }
+
+        /* Row Actions */
+        .row-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+        }
+
+        tr:hover .row-actions {
+            opacity: 1;
+        }
+
+        /* Status dot */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot.included { background: var(--success); }
+        .status-dot.targeted { background: var(--warning); }
+        .status-dot.pending { background: var(--text-disabled); }
+        .status-dot.missed { background: var(--danger); }
+
+        /* Print */
+        @media print {
+            .loop-header, .loop-toolbar, .component-actions, .row-actions, .add-row { display: none !important; }
+            .loop-page { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loop-page">
+        <!-- Header -->
+        <header class="loop-header">
+            <div class="loop-header-left">
+                <div class="loop-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                </div>
+                <input type="text" class="loop-title-input" value="Release Train Tracker" id="docTitle">
+            </div>
+            <div class="loop-header-actions">
+                <div class="avatar-stack">
+                    <div class="avatar blue">RK</div>
+                    <div class="avatar green">JS</div>
+                    <div class="avatar purple">+3</div>
+                </div>
+                <button class="header-btn" onclick="exportData()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V3h3v5H12L8 12z"/><path d="M14 14H2v-3H1v4h14v-4h-1v3z"/></svg>
+                    Export
+                </button>
+                <button class="header-btn primary" onclick="shareDoc()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13 11c-.7 0-1.37.27-1.88.72L6.3 8.93c.05-.15.08-.3.08-.47s-.03-.32-.08-.47l4.78-2.76c.52.47 1.2.77 1.92.77 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .17.03.32.08.47L5.3 6.23C4.78 5.76 4.1 5.5 3.4 5.5c-1.66 0-3 1.34-3 3s1.34 3 3 3c.7 0 1.37-.27 1.88-.72l4.82 2.79c-.05.15-.08.3-.08.47 0 1.66 1.34 3 3 3s3-1.34 3-3-1.34-3-3-3z"/></svg>
+                    Share
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="loop-content">
+            <!-- Title -->
+            <h1 class="doc-title" contenteditable="true" data-placeholder="Untitled">Release Train Fix Tracker</h1>
+            <div class="doc-subtitle">
+                <span class="last-edited">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" opacity="0.6"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zM8.5 4H7v5l4.25 2.55.75-1.23-3.5-2.08V4z"/></svg>
+                    Last edited just now
+                </span>
+                <span>•</span>
+                <span id="totalFixCount">7 fixes tracked</span>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-ring-container">
+                    <svg class="progress-ring" width="100" height="100">
+                        <circle class="progress-ring-bg" cx="50" cy="50" r="42"/>
+                        <circle class="progress-ring-fill" cx="50" cy="50" r="42"
+                                stroke-dasharray="264" stroke-dashoffset="264" id="progressRing"/>
+                    </svg>
+                    <div class="progress-text">
+                        <div class="progress-percent" id="progressPercent">0%</div>
+                        <div class="progress-label">Complete</div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon included">✓</div>
+                        <div>
+                            <div class="stat-value" id="statIncluded">0</div>
+                            <div class="stat-label">Included</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon targeted">◎</div>
+                        <div>
+                            <div class="stat-value" id="statTargeted">0</div>
+                            <div class="stat-label">Targeted</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon pending">○</div>
+                        <div>
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon missed">✕</div>
+                        <div>
+                            <div class="stat-value" id="statMissed">0</div>
+                            <div class="stat-label">Missed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Train Tabs -->
+            <div class="train-tabs" id="trainTabs"></div>
+
+            <!-- Train Info -->
+            <div class="train-info" id="trainInfo"></div>
+
+            <!-- Fixes Component -->
+            <div class="loop-component" id="fixesComponent">
+                <div class="component-header">
+                    <div class="component-title">
+                        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5v9a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-9zm1.5-.5a.5.5 0 00-.5.5v9a.5.5 0 00.5.5h9a.5.5 0 00.5-.5v-9a.5.5 0 00-.5-.5h-9z"/><path d="M5.5 6.5A.5.5 0 016 6h4a.5.5 0 010 1H6a.5.5 0 01-.5-.5zm0 3A.5.5 0 016 9h4a.5.5 0 010 1H6a.5.5 0 01-.5-.5z"/></svg>
+                        Fix Checklist
+                    </div>
+                    <div class="component-actions">
+                        <button class="icon-btn" onclick="filterFixes('all')" title="Show all">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2.5A.5.5 0 011.5 2h13a.5.5 0 010 1h-13a.5.5 0 01-.5-.5zm0 4A.5.5 0 011.5 6h13a.5.5 0 010 1h-13a.5.5 0 01-.5-.5zm0 4a.5.5 0 01.5-.5h13a.5.5 0 010 1h-13a.5.5 0 01-.5-.5z"/></svg>
+                        </button>
+                        <button class="icon-btn" onclick="sortFixes()" title="Sort">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2v12l3-3H4V4h2L3 2zm7 10V4l-3 3h2v5H7l3 3z"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <table class="checklist-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px"></th>
+                            <th style="width:80px">Bug ID</th>
+                            <th>Title</th>
+                            <th style="width:100px">Owner</th>
+                            <th style="width:60px">Priority</th>
+                            <th style="width:100px">Status</th>
+                            <th>Notes</th>
+                            <th style="width:60px"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="fixesBody"></tbody>
+                </table>
+                <div class="add-row" onclick="addFix()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 2z"/></svg>
+                    Add a fix
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Toolbar -->
+    <div class="loop-toolbar">
+        <button class="toolbar-btn" onclick="addFix()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a.5.5 0 01.5.5v5h5a.5.5 0 010 1h-5v5a.5.5 0 01-1 0v-5h-5a.5.5 0 010-1h5v-5A.5.5 0 018 2z"/></svg>
+            Add Fix
+        </button>
+        <button class="toolbar-btn" onclick="addTrain()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 3.5A1.5 1.5 0 015.5 2h5A1.5 1.5 0 0112 3.5V5h1.5A1.5 1.5 0 0115 6.5v6a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-6A1.5 1.5 0 012.5 5H4V3.5z"/></svg>
+            Add Train
+        </button>
+        <div class="toolbar-divider"></div>
+        <button class="toolbar-btn" onclick="importData()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3l4 4h-2.5v5h-3V7H4l4-4z"/></svg>
+            Import
+        </button>
+        <button class="toolbar-btn" onclick="exportData()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-4-4h2.5V3h3v5H12L8 12z"/></svg>
+            Export
+        </button>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)">
+
+    <script>
+        // ========== DATA ==========
+        let data = {
+            trains: [
+                { id: "1", name: "T2-W-Web-25-Nov-A", codeCutoff: "2025-10-31T05:30", snapDate: "2025-11-03T09:00", ring2: "2025-11-03T09:00", ring3: "2025-11-07T09:00", general: "2025-11-17T21:00" },
+                { id: "2", name: "T2-W-Web-26-Jan-C", codeCutoff: "2026-01-16T05:30", snapDate: "2026-01-19T09:00", ring2: "2026-01-19T09:00", ring3: "2026-01-23T09:00", general: "2026-02-04T18:00" },
+                { id: "3", name: "T2-W-Web-26-Jan-D", codeCutoff: "2026-01-23T05:30", snapDate: "2026-01-26T09:00", ring2: "2026-01-26T09:00", ring3: "", general: "" },
+                { id: "4", name: "T2-W-Web-26-Feb-A", codeCutoff: "2026-01-30T05:30", snapDate: "2026-02-02T09:00", ring2: "2026-02-02T09:00", ring3: "2026-02-06T09:00", general: "2026-02-18T18:00" },
+                { id: "5", name: "T2-W-Web-26-Feb-B", codeCutoff: "2026-02-06T05:30", snapDate: "2026-02-09T09:00", ring2: "2026-02-09T09:00", ring3: "", general: "" },
+                { id: "6", name: "T2-W-Web-26-Feb-C", codeCutoff: "2026-02-13T05:30", snapDate: "2026-02-16T09:00", ring2: "2026-02-16T09:00", ring3: "2026-02-20T09:00", general: "2026-03-04T18:00" },
+                { id: "7", name: "T2-W-Web-26-Feb-D", codeCutoff: "2026-02-20T05:30", snapDate: "2026-02-23T09:00", ring2: "2026-02-23T09:00", ring3: "", general: "" },
+            ],
+            fixes: [
+                { id: "1", bugId: "12345", title: "Fix login timeout issue", component: "Auth", owner: "John", priority: "P1", targetTrain: "4", status: "Included", notes: "Verified in Ring2" },
+                { id: "2", bugId: "12346", title: "API retry logic for failures", component: "API", owner: "Sarah", priority: "P1", targetTrain: "4", status: "Included", notes: "" },
+                { id: "3", bugId: "12347", title: "Cache invalidation bug", component: "Cache", owner: "Mike", priority: "P2", targetTrain: "5", status: "Included", notes: "" },
+                { id: "4", bugId: "12348", title: "UI alignment on dashboard", component: "UI", owner: "Lisa", priority: "P3", targetTrain: "5", status: "Pending", notes: "Waiting for code review" },
+                { id: "5", bugId: "12349", title: "Memory leak in worker", component: "Core", owner: "John", priority: "P1", targetTrain: "6", status: "Targeted", notes: "PR merged" },
+                { id: "6", bugId: "12350", title: "Search filter not working", component: "Search", owner: "Sarah", priority: "P2", targetTrain: "6", status: "Targeted", notes: "" },
+                { id: "7", bugId: "12351", title: "Export to PDF broken", component: "Export", owner: "Mike", priority: "P2", targetTrain: "3", status: "Missed", notes: "Missed Jan-D cutoff" },
+            ]
+        };
+
+        let currentTrainId = 'all';
+        let currentFilter = 'all';
+
+        const colors = ['#0078D4', '#107C10', '#6264A7', '#CA5010', '#8764B8', '#038387'];
+        const getOwnerColor = (name) => colors[name?.charCodeAt(0) % colors.length || 0];
+
+        // ========== INIT ==========
+        function init() {
+            loadData();
+            renderTrainTabs();
+            renderTrainInfo();
+            renderFixes();
+            updateStats();
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('loopTrackerData');
+            if (saved) {
+                try { data = JSON.parse(saved); } catch(e) {}
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('loopTrackerData', JSON.stringify(data));
+            updateStats();
+        }
+
+        // ========== RENDER ==========
+        function renderTrainTabs() {
+            const tabs = document.getElementById('trainTabs');
+            const allCount = data.fixes.length;
+
+            tabs.innerHTML = `
+                <button class="train-tab ${currentTrainId === 'all' ? 'active' : ''}" onclick="selectTrain('all')">
+                    All Trains<span class="badge">${allCount}</span>
+                </button>
+                ${data.trains.map(t => {
+                    const count = data.fixes.filter(f => f.targetTrain === t.id).length;
+                    return `
+                        <button class="train-tab ${currentTrainId === t.id ? 'active' : ''}" onclick="selectTrain('${t.id}')">
+                            ${t.name.split('-').slice(-2).join('-')}<span class="badge">${count}</span>
+                        </button>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        function renderTrainInfo() {
+            const info = document.getElementById('trainInfo');
+
+            if (currentTrainId === 'all') {
+                info.style.display = 'none';
+                return;
+            }
+
+            const train = data.trains.find(t => t.id === currentTrainId);
+            if (!train) return;
+
+            info.style.display = 'grid';
+            info.innerHTML = `
+                <div class="train-info-item">
+                    <div class="train-info-label">Code Cutoff</div>
+                    <div class="train-info-value highlight">${formatDateTime(train.codeCutoff)}</div>
+                </div>
+                <div class="train-info-item">
+                    <div class="train-info-label">Snap Date</div>
+                    <div class="train-info-value">${formatDateTime(train.snapDate)}</div>
+                </div>
+                <div class="train-info-item">
+                    <div class="train-info-label">Ring 2</div>
+                    <div class="train-info-value">${formatDateTime(train.ring2)}</div>
+                </div>
+                <div class="train-info-item">
+                    <div class="train-info-label">Ring 3</div>
+                    <div class="train-info-value">${train.ring3 ? formatDateTime(train.ring3) : '—'}</div>
+                </div>
+                <div class="train-info-item">
+                    <div class="train-info-label">General</div>
+                    <div class="train-info-value">${train.general ? formatDateTime(train.general) : '—'}</div>
+                </div>
+            `;
+        }
+
+        function renderFixes() {
+            const tbody = document.getElementById('fixesBody');
+            let fixes = currentTrainId === 'all'
+                ? data.fixes
+                : data.fixes.filter(f => f.targetTrain === currentTrainId);
+
+            if (currentFilter !== 'all') {
+                fixes = fixes.filter(f => f.status.toLowerCase() === currentFilter);
+            }
+
+            if (fixes.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <p>No fixes ${currentTrainId === 'all' ? 'tracked yet' : 'in this train'}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = fixes.map(fix => {
+                const isCompleted = fix.status === 'Included';
+                const train = data.trains.find(t => t.id === fix.targetTrain);
+                return `
+                    <tr class="${isCompleted ? 'completed' : ''}" data-id="${fix.id}">
+                        <td>
+                            <div class="loop-checkbox ${isCompleted ? 'checked' : ''}" onclick="toggleStatus('${fix.id}')">
+                                <svg viewBox="0 0 16 16"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fix-id" onclick="openBug('${fix.bugId}')">${fix.bugId}</span>
+                        </td>
+                        <td>
+                            <input type="text" class="fix-title-input" value="${fix.title}"
+                                   onchange="updateFix('${fix.id}', 'title', this.value)">
+                        </td>
+                        <td>
+                            <div class="owner-cell">
+                                <div class="owner-avatar" style="background:${getOwnerColor(fix.owner)}">${fix.owner?.charAt(0) || '?'}</div>
+                                <input type="text" class="notes-input" value="${fix.owner || ''}"
+                                       placeholder="Owner" style="width:60px"
+                                       onchange="updateFix('${fix.id}', 'owner', this.value)">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="inline-dropdown">
+                                <span class="tag ${fix.priority.toLowerCase()}" onclick="toggleDropdown(this)">${fix.priority}</span>
+                                <div class="dropdown-menu">
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'priority', 'P1')"><span class="tag p1">P1</span> Critical</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'priority', 'P2')"><span class="tag p2">P2</span> High</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'priority', 'P3')"><span class="tag p3">P3</span> Medium</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="inline-dropdown">
+                                <span class="tag ${fix.status.toLowerCase().replace(' ', '-')}" onclick="toggleDropdown(this)">
+                                    <span class="status-dot ${fix.status.toLowerCase().replace(' ', '-')}"></span>
+                                    ${fix.status}
+                                </span>
+                                <div class="dropdown-menu">
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'status', 'Pending')"><span class="status-dot pending"></span> Pending</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'status', 'Targeted')"><span class="status-dot targeted"></span> Targeted</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'status', 'Included')"><span class="status-dot included"></span> Included</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'status', 'Missed')"><span class="status-dot missed"></span> Missed</div>
+                                    <div class="dropdown-item" onclick="updateFix('${fix.id}', 'status', 'Rolled Back')"><span class="status-dot rolled-back"></span> Rolled Back</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="notes-cell">
+                            <input type="text" class="notes-input" value="${fix.notes || ''}"
+                                   placeholder="Add notes..."
+                                   onchange="updateFix('${fix.id}', 'notes', this.value)">
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="icon-btn" onclick="deleteFix('${fix.id}')" title="Delete">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/><path d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const fixes = data.fixes;
+            const included = fixes.filter(f => f.status === 'Included').length;
+            const targeted = fixes.filter(f => f.status === 'Targeted').length;
+            const pending = fixes.filter(f => f.status === 'Pending').length;
+            const missed = fixes.filter(f => f.status === 'Missed').length;
+
+            document.getElementById('statIncluded').textContent = included;
+            document.getElementById('statTargeted').textContent = targeted;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statMissed').textContent = missed;
+            document.getElementById('totalFixCount').textContent = `${fixes.length} fixes tracked`;
+
+            // Progress ring
+            const total = fixes.length || 1;
+            const percent = Math.round((included / total) * 100);
+            const circumference = 264;
+            const offset = circumference - (percent / 100) * circumference;
+
+            document.getElementById('progressRing').style.strokeDashoffset = offset;
+            document.getElementById('progressPercent').textContent = percent + '%';
+        }
+
+        // ========== ACTIONS ==========
+        function selectTrain(trainId) {
+            currentTrainId = trainId;
+            renderTrainTabs();
+            renderTrainInfo();
+            renderFixes();
+        }
+
+        function toggleStatus(fixId) {
+            const fix = data.fixes.find(f => f.id === fixId);
+            if (!fix) return;
+            fix.status = fix.status === 'Included' ? 'Pending' : 'Included';
+            saveData();
+            renderFixes();
+            showToast(fix.status === 'Included' ? '✓ Marked as included' : 'Marked as pending');
+        }
+
+        function updateFix(fixId, field, value) {
+            const fix = data.fixes.find(f => f.id === fixId);
+            if (!fix) return;
+            fix[field] = value;
+            saveData();
+            renderFixes();
+            closeAllDropdowns();
+        }
+
+        function addFix() {
+            const newFix = {
+                id: Date.now().toString(),
+                bugId: '',
+                title: 'New fix',
+                component: '',
+                owner: '',
+                priority: 'P2',
+                targetTrain: currentTrainId === 'all' ? data.trains[0]?.id : currentTrainId,
+                status: 'Pending',
+                notes: ''
+            };
+            data.fixes.unshift(newFix);
+            saveData();
+            renderFixes();
+            renderTrainTabs();
+
+            // Focus the bug ID input
+            setTimeout(() => {
+                const input = document.querySelector(`tr[data-id="${newFix.id}"] .fix-id`)?.closest('td')?.nextElementSibling?.querySelector('input');
+                input?.focus();
+            }, 100);
+        }
+
+        function deleteFix(fixId) {
+            data.fixes = data.fixes.filter(f => f.id !== fixId);
+            saveData();
+            renderFixes();
+            renderTrainTabs();
+            showToast('Fix deleted');
+        }
+
+        function addTrain() {
+            const name = prompt('Enter train name (e.g., T2-W-Web-26-Mar-A):');
+            if (!name) return;
+
+            data.trains.push({
+                id: Date.now().toString(),
+                name: name,
+                codeCutoff: '',
+                snapDate: '',
+                ring2: '',
+                ring3: '',
+                general: ''
+            });
+            saveData();
+            renderTrainTabs();
+            showToast('Train added');
+        }
+
+        function openBug(bugId) {
+            // Customize this URL pattern for your bug tracking system
+            // window.open(`https://dev.azure.com/yourorg/_workitems/edit/${bugId}`, '_blank');
+            showToast(`Opening bug ${bugId}...`);
+        }
+
+        // ========== DROPDOWN ==========
+        function toggleDropdown(element) {
+            closeAllDropdowns();
+            const menu = element.nextElementSibling;
+            if (menu) menu.classList.toggle('show');
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.inline-dropdown')) closeAllDropdowns();
+        });
+
+        // ========== IMPORT/EXPORT ==========
+        function exportData() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `loop-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Data exported');
+        }
+
+        function importData() {
+            document.getElementById('importInput').click();
+        }
+
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.trains && imported.fixes) {
+                        data = imported;
+                        saveData();
+                        renderTrainTabs();
+                        renderTrainInfo();
+                        renderFixes();
+                        showToast('Data imported');
+                    }
+                } catch(err) {
+                    showToast('Invalid file format');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function shareDoc() {
+            if (navigator.share) {
+                navigator.share({ title: 'Loop Tracker', url: window.location.href });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showToast('Link copied to clipboard');
+            }
+        }
+
+        // ========== UTILS ==========
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+                   ', ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function filterFixes(status) {
+            currentFilter = status;
+            renderFixes();
+        }
+
+        function sortFixes() {
+            data.fixes.sort((a, b) => {
+                const order = { P1: 0, P2: 1, P3: 2 };
+                return order[a.priority] - order[b.priority];
+            });
+            saveData();
+            renderFixes();
+            showToast('Sorted by priority');
+        }
+
+        // Init
+        init();
+    </script>
+</body>
+</html>

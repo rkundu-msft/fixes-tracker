@@ -1,0 +1,8 @@
+BugID,Title,Component,Owner,Priority,TargetTrain,ActualTrain,Status,Notes
+12345,Fix login timeout issue,Auth,John,P1,T2-W-Web-26-Feb-A,T2-W-Web-26-Feb-A,Included,Verified in Ring2
+12346,API retry logic for failures,API,Sarah,P1,T2-W-Web-26-Feb-A,T2-W-Web-26-Feb-A,Included,
+12347,Cache invalidation bug,Cache,Mike,P2,T2-W-Web-26-Feb-B,T2-W-Web-26-Feb-B,Included,
+12348,UI alignment on dashboard,UI,Lisa,P3,T2-W-Web-26-Feb-B,,Pending,Waiting for code review
+12349,Memory leak in worker,Core,John,P1,T2-W-Web-26-Feb-C,,Targeted,PR merged
+12350,Search filter not working,Search,Sarah,P2,T2-W-Web-26-Feb-C,,Targeted,
+12351,Export to PDF broken,Export,Mike,P2,T2-W-Web-26-Jan-D,T2-W-Web-26-Feb-A,Missed,Missed Jan-D cutoff - moved to Feb-A
