@@ -604,21 +604,14 @@
         /* Inline Dropdown */
         .inline-dropdown {
             position: relative;
-            z-index: 1;
-        }
-
-        .inline-dropdown:has(.dropdown-menu.show) {
-            z-index: 100;
         }
 
         .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
+            position: fixed;
             background: white;
             border: 1px solid var(--border);
             border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             z-index: 9999;
             min-width: 160px;
             padding: 4px;
@@ -627,23 +620,6 @@
 
         .dropdown-menu.show {
             display: block;
-        }
-
-        /* Ensure table rows don't clip dropdowns */
-        .checklist-table {
-            overflow: visible;
-        }
-
-        .checklist-table tbody {
-            overflow: visible;
-        }
-
-        .checklist-table tr {
-            position: relative;
-        }
-
-        .checklist-table td {
-            overflow: visible;
         }
 
         .dropdown-item {
@@ -1512,19 +1488,30 @@
         }
 
         // ========== DROPDOWN ==========
-        function toggleDropdown(element) {
+        function toggleDropdown(element, event) {
             closeAllDropdowns();
             const menu = element.nextElementSibling;
-            if (menu) menu.classList.toggle('show');
+            if (menu) {
+                // Position the dropdown below the clicked element
+                const rect = element.getBoundingClientRect();
+                menu.style.top = (rect.bottom + 4) + 'px';
+                menu.style.left = rect.left + 'px';
+                menu.classList.toggle('show');
+            }
         }
 
         function closeAllDropdowns() {
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                m.classList.remove('show');
+            });
         }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.inline-dropdown')) closeAllDropdowns();
         });
+
+        // Close dropdown on scroll
+        document.addEventListener('scroll', closeAllDropdowns, true);
 
         // ========== IMPORT/EXPORT ==========
         function exportData() {
